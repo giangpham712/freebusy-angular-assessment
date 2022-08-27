@@ -93,6 +93,7 @@ specifiers:
   tslib: ^2.4.0
   typescript: ~4.7.4
   util: ^0.12.4
+  uuid: ^8.3.2
   zone.js: ^0.11.8
 
 dependencies:
@@ -102,6 +103,7 @@ dependencies:
   calendar-utils: 0.10.1
   positioning: 2.0.1
   tslib: 2.4.0
+  uuid: 8.3.2
 
 devDependencies:
   '@angular-devkit/build-angular': 14.1.2_eqfgrsv66l6jibkcl67emfndxa
@@ -13831,7 +13833,6 @@ packages:
   /uuid/8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
-    dev: true
 
   /v8-compile-cache-lib/3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}

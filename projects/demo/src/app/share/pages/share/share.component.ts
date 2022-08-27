@@ -4,18 +4,18 @@ import { Component, OnInit } from '@angular/core';
 import { PickerMode, TimeRange } from '../../../shared/components/time-range-picker/time-range-picker.component';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: 'profile.component.html',
+  selector: 'app-shared',
+  templateUrl: 'share.component.html',
 })
-export class ProfileComponent implements OnInit {
-  times: TimeRange[] = [];
-
+export class ShareComponent implements OnInit {
   PickerMode = PickerMode;
+
+  times: TimeRange[] = [];
 
   constructor() {}
 
   ngOnInit() {
-    console.log('ProfileComponent: ngOnInit');
+    console.log('ShareComponent: ngOnInit');
   }
 
   onTimeSelect = (event: TimeRange) => {

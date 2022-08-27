@@ -173,7 +173,8 @@
     "angular-resizable-element": "^6.0.0",
     "calendar-utils": "^0.10.1",
     "positioning": "^2.0.1",
-    "tslib": "^2.4.0"
+    "tslib": "^2.4.0",
+    "uuid": "^8.3.2"
   },
   "sideEffects": [
     "*.css",
