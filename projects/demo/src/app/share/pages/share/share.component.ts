@@ -31,6 +31,10 @@ export class ShareComponent implements OnInit {
 
   onMeetingDurationChange = () => {
     console.log(this.meetingDuration);
+    this.times = this.times.map(time => ({
+      ...time,
+      end: addMinutes(time.start, this.meetingDuration),
+    }));
   };
 
   onTimeSelect = (event: TimeRange) => {
