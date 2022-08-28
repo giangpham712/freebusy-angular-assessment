@@ -15,41 +15,6 @@ function ceilToNearest(amount: number, precision: number) {
   return Math.ceil(amount / precision) * precision;
 }
 
-const createEvent = ({
-  id,
-  title,
-  start,
-  end,
-  onDelete,
-}: {
-  id?: string;
-  title: string;
-  start: Date;
-  end: Date;
-  onDelete?: ({ event }: { event: CalendarEvent }) => void;
-}): CalendarEvent => {
-  const actions: CalendarEventAction[] = [];
-  if (onDelete)
-    actions.push({
-      label: '<span class="cal-event-delete"><i class="bi bi-x-circle-fill"></i></span>',
-      onClick: onDelete,
-    });
-
-  return {
-    id,
-    title,
-    start,
-    end,
-    meta: {},
-    draggable: true,
-    resizable: {
-      beforeStart: true,
-      afterEnd: true,
-    },
-    actions,
-  };
-};
-
 export interface TimeRange {
   title?: string;
   description?: string;
@@ -93,13 +58,13 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   }
 
   @Output()
-  timeRangeSelect = new EventEmitter<TimeRange>();
+  timeRangeCreate = new EventEmitter<{ created: TimeRange }>();
 
   @Output()
-  timeRangeDelete = new EventEmitter<TimeRange>();
+  timeRangeDelete = new EventEmitter<{ deleted: TimeRange }>();
 
   @Output()
-  timeRangeUpdate = new EventEmitter<TimeRange>();
+  timeRangeUpdate = new EventEmitter<{ updated: TimeRange; original: TimeRange }>();
 
   viewDate = new Date();
 
@@ -143,17 +108,18 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     return this.eventsSources.value;
   }
 
-  private timeRangeToEvent(time: TimeRange): CalendarEvent {
-    const { title, start, end } = time;
-    const event = createEvent({
+  private timeRangeToEvent(timeRange: TimeRange): CalendarEvent {
+    const { title, start, end } = timeRange;
+    const event = this.createEvent({
       id: uuid.v4(),
       title: title || `${format(start, 'p')} - ${format(end, 'p')}`,
       start,
       end,
-      onDelete: ({ event }) => this.onEventDeleted({ event }),
+      canDelete: true,
+      canResize: !this.timeRangeFixedDuration,
     });
 
-    event.meta.timeRange = time;
+    event.meta.timeRange = timeRange;
     return event;
   }
 
@@ -164,7 +130,7 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   onMouseDown(segment: WeekViewHourSegment, mouseDownEvent: MouseEvent, segmentElement: HTMLElement) {
     if (this.timeRangeFixedDuration) {
       this.onEventCreated({
-        event: createEvent({
+        event: this.createEvent({
           title: 'New event',
           start: segment.date,
           end: addMinutes(segment.date, this.timeRangeFixedDuration),
@@ -188,9 +154,12 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
 
     if (timeRange && this.validateUpdatedEvent(updatedEvent, event)) {
       this.timeRangeUpdate.next({
-        ...timeRange,
-        start: newStart,
-        end: newEnd,
+        updated: {
+          ...timeRange,
+          start: newStart,
+          end: newEnd,
+        },
+        original: timeRange,
       });
     }
   }
@@ -242,9 +211,11 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   private onEventCreated({ event }: { event: CalendarEvent }) {
     if (this.validateCreatedEvent(event)) {
       const { start, end } = event;
-      this.timeRangeSelect.next({
-        start,
-        end,
+      this.timeRangeCreate.next({
+        created: {
+          start,
+          end,
+        },
       });
     }
   }
@@ -252,7 +223,7 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   private onEventDeleted({ event }: { event: CalendarEvent }): void {
     const timeRange = event.meta?.timeRange;
     if (timeRange) {
-      this.timeRangeDelete.next(timeRange);
+      this.timeRangeDelete.next({ deleted: timeRange });
     }
   }
   private validateCreatedEvent = (event: CalendarEvent): event is CalendarEvent & { end: Date } => {
@@ -273,6 +244,46 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
 
     return true;
   };
+
+  private createEvent({
+    id,
+    title,
+    start,
+    end,
+    canResize,
+    canDelete,
+  }: {
+    id?: string;
+    title: string;
+    start: Date;
+    end: Date;
+    canResize?: boolean;
+    canDelete?: boolean;
+  }): CalendarEvent {
+    const actions: CalendarEventAction[] = [];
+
+    if (canDelete)
+      actions.push({
+        label: '<span class="cal-event-delete"><i class="bi bi-x-circle-fill"></i></span>',
+        onClick: ({ event }) => this.onEventDeleted({ event }),
+      });
+
+    return {
+      id,
+      title,
+      start,
+      end,
+      meta: {},
+      draggable: true,
+      resizable: canResize
+        ? {
+            beforeStart: true,
+            afterEnd: true,
+          }
+        : null,
+      actions,
+    };
+  }
 
   private validateUpdatedEvent = (
     event: CalendarEvent,

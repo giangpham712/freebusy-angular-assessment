@@ -37,31 +37,27 @@ export class ShareComponent implements OnInit {
     }));
   };
 
-  onTimeRangeSelect = (event: TimeRange) => {
-    console.log('onTimeSelect', event);
-
-    const newEvent = {
-      ...event,
+  onTimeRangeCreate = ({ created }: { created: TimeRange }) => {
+    const newTimeRange = {
+      ...created,
       id: uuid.v4(),
-      title: `${format(event.start, 'p')} - ${format(event.end, 'p')}`,
+      title: `${format(created.start, 'p')} - ${format(created.end, 'p')}`,
     };
 
-    this.timeRanges = [...this.timeRanges, newEvent];
+    this.timeRanges = [...this.timeRanges, newTimeRange];
   };
 
-  onTimeRangeDelete = (timeRange: TimeRange) => {
-    console.log('onTimeDelete', timeRange);
-    this.timeRanges = this.timeRanges.filter(x => x !== timeRange);
+  onTimeRangeDelete = ({ deleted }: { deleted: TimeRange }) => {
+    this.timeRanges = this.timeRanges.filter(x => x !== deleted);
   };
 
-  onTimeRangeUpdate = (timeRange: TimeRange) => {
-    console.log('onTimeUpdate', timeRange);
+  onTimeRangeUpdate = ({ updated, original }: { updated: TimeRange; original: TimeRange }) => {
     this.timeRanges = this.timeRanges.map(x => {
-      if (x === timeRange) {
-        return x;
+      if (x === original) {
+        return updated;
       }
 
-      return timeRange;
+      return x;
     });
   };
 }

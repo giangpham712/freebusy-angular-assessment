@@ -7,7 +7,7 @@
       [mode]="PickerMode.Timetable"
       [timeRangeGridSize]="30"
       [timeRanges]="timeRanges"
-      (timeRangeSelect)="onTimeRangeSelect($event)"
+      (timeRangeCreate)="onTimeRangeCreate($event)"
       (timeRangeDelete)="onTimeRangeDelete($event)"
       (timeRangeUpdate)="onTimeRangeUpdate($event)"
     ></app-time-range-picker>
