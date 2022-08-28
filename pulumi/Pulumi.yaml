@@ -1,0 +1,14 @@
+name: freebusy-angular-assessment
+runtime: yaml
+description: Giang's FreeBusy Angular Assessment
+
+resources:
+  # Create an AWS resource (S3 Bucket)
+  web:
+    type: "aws-static-website:index:Website"
+    properties:
+      sitePath: "../dist/demo/"
+
+outputs:
+  # Export the name of the bucket
+  bucketName: ${web.websiteURL}

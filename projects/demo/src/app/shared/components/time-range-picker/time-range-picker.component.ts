@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnInit,
-  Output,
-  EventEmitter,
-  SimpleChanges,
-  OnDestroy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import * as uuid from 'uuid';
 import { format } from 'date-fns';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, Subject } from 'rxjs';
@@ -50,9 +40,7 @@ const createEvent = ({
     title,
     start,
     end,
-    meta: {
-      tmpEvent: true,
-    },
+    meta: {},
     draggable: true,
     resizable: {
       beforeStart: true,
@@ -62,13 +50,7 @@ const createEvent = ({
   };
 };
 
-export interface Time {
-  hour: number;
-  minute: number;
-}
-
 export interface TimeRange {
-  id?: string;
   title?: string;
   description?: string;
   start: Date;
@@ -89,54 +71,54 @@ export type GridSize = 15 | 30 | 60;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimeRangePickerComponent implements OnInit, OnDestroy {
+  PickerMode = PickerMode;
+
   destroySource = new Subject<boolean>();
 
   @Input()
   mode: PickerMode = PickerMode.Calendar;
 
   @Input()
-  timeGridSize: GridSize = 15;
+  timeRangeGridSize: GridSize = 15;
 
   @Input()
-  set times(times: TimeRange[]) {
-    this.timesSource.next(times);
-  }
-
-  @Input()
-  timeFixedDuration: number | null = null;
+  timeRangeFixedDuration: number | null = null;
 
   @Input()
   maxTimesPerDay: number | null = null;
 
-  @Output()
-  timeSelect = new EventEmitter<TimeRange>();
+  @Input()
+  set timeRanges(timeRanges: TimeRange[]) {
+    this.timeRangesSource.next(timeRanges);
+  }
 
   @Output()
-  timeDelete = new EventEmitter<TimeRange>();
+  timeRangeSelect = new EventEmitter<TimeRange>();
 
   @Output()
-  timeUpdate = new EventEmitter<TimeRange>();
+  timeRangeDelete = new EventEmitter<TimeRange>();
 
-  PickerMode = PickerMode;
+  @Output()
+  timeRangeUpdate = new EventEmitter<TimeRange>();
 
   viewDate = new Date();
 
   weekStartsOn: 0 = 0;
 
-  timesSource: BehaviorSubject<TimeRange[]> = new BehaviorSubject<TimeRange[]>([]);
+  timeRangesSource: BehaviorSubject<TimeRange[]> = new BehaviorSubject<TimeRange[]>([]);
   eventFromDragSource = new BehaviorSubject<CalendarEvent>(null);
 
   eventsSources = new BehaviorSubject<CalendarEvent[]>([]);
   events$: Observable<CalendarEvent[]> = this.eventsSources.asObservable();
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor() {}
 
   ngOnInit(): void {
-    combineLatest([this.timesSource, this.eventFromDragSource])
+    combineLatest([this.timeRangesSource, this.eventFromDragSource])
       .pipe(
         takeUntil(this.destroySource),
-        map(([times, eventFromDrag]) => {
-          return [...times.map(t => this.timeToEvent(t)), ...(eventFromDrag ? [eventFromDrag] : [])];
+        map(([timeRanges, eventFromDrag]) => {
+          return [...timeRanges.map(t => this.timeRangeToEvent(t)), ...(eventFromDrag ? [eventFromDrag] : [])];
         }),
         tap(events => {
           this.eventsSources.next(events);
@@ -145,12 +127,12 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  get times() {
-    return this.timesSource.value;
+  get timeRanges() {
+    return this.timeRangesSource.value;
   }
 
   get hourSegments() {
-    return 60 / this.timeGridSize;
+    return 60 / this.timeRangeGridSize;
   }
 
   get eventFromDrag() {
@@ -161,62 +143,31 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     return this.eventsSources.value;
   }
 
-  private timeToEvent(time: TimeRange): CalendarEvent {
-    const { id, title, start, end } = time;
-    return createEvent({
-      id,
+  private timeRangeToEvent(time: TimeRange): CalendarEvent {
+    const { title, start, end } = time;
+    const event = createEvent({
+      id: uuid.v4(),
       title: title || `${format(start, 'p')} - ${format(end, 'p')}`,
       start,
       end,
       onDelete: ({ event }) => this.onEventDeleted({ event }),
     });
+
+    event.meta.timeRange = time;
+    return event;
   }
 
-  private eventToTime(event: CalendarEvent): TimeRange {
+  private eventToTimeRange(event: CalendarEvent): TimeRange {
     return {} as TimeRange;
   }
 
-  validateTime = (event: CalendarEvent): event is CalendarEvent & { end: Date } => {
-    // don't allow dragging or resizing events to different days
-    const { start, end } = event;
-    if (!end) {
-      return false;
-    }
-
-    const sameDay = isSameDay(start, end);
-
-    if (!sameDay) {
-      return false;
-    }
-
-    // don't allow dragging events to the same times as other events
-    const overlappingEvent = this.events.find(otherEvent => {
-      return (
-        otherEvent.id !== event.id &&
-        !otherEvent.allDay &&
-        !!otherEvent.end &&
-        !!event.end &&
-        ((otherEvent.start < event.start && event.start < otherEvent.end) ||
-          (otherEvent.start < event.end && event.start < otherEvent.end))
-      );
-    });
-
-    console.log(overlappingEvent);
-
-    if (overlappingEvent) {
-      return false;
-    }
-
-    return true;
-  };
-
   onMouseDown(segment: WeekViewHourSegment, mouseDownEvent: MouseEvent, segmentElement: HTMLElement) {
-    if (this.timeFixedDuration) {
+    if (this.timeRangeFixedDuration) {
       this.onEventCreated({
         event: createEvent({
           title: 'New event',
           start: segment.date,
-          end: addMinutes(segment.date, this.timeFixedDuration),
+          end: addMinutes(segment.date, this.timeRangeFixedDuration),
         }),
       });
 
@@ -226,14 +177,31 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     this.startDragToCreate(segment, mouseDownEvent, segmentElement);
   }
 
-  startDragToCreate(segment: WeekViewHourSegment, mouseDownEvent: MouseEvent, segmentElement: HTMLElement) {
+  onEventTimesChanged({ event, newStart, newEnd }: CalendarEventTimesChangedEvent) {
+    const updatedEvent = {
+      ...event,
+      start: newStart,
+      end: newEnd,
+    };
+
+    const timeRange = event.meta.timeRange;
+
+    if (timeRange && this.validateUpdatedEvent(updatedEvent, event)) {
+      this.timeRangeUpdate.next({
+        ...timeRange,
+        start: newStart,
+        end: newEnd,
+      });
+    }
+  }
+
+  private startDragToCreate(segment: WeekViewHourSegment, mouseDownEvent: MouseEvent, segmentElement: HTMLElement) {
     const eventFromDrag = {
       id: this.events.length,
       title: 'New event',
       start: segment.date,
-      meta: {
-        tmpEvent: true,
-      },
+      end: addMinutes(segment.date, this.timeRangeGridSize),
+      meta: {},
     };
 
     this.eventFromDragSource.next(eventFromDrag);
@@ -247,10 +215,7 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     fromEvent<MouseEvent>(document, 'mousemove')
       .pipe(
         finalize(() => {
-          console.log('Finalize');
           if (this.eventFromDrag) {
-            delete this.eventFromDrag.meta.tmpEvent;
-
             this.onEventCreated({ event: this.eventFromDrag });
 
             this.eventFromDragSource.next(null);
@@ -259,7 +224,7 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
         takeUntil(fromEvent(document, 'mouseup')),
       )
       .subscribe((mouseMoveEvent: MouseEvent) => {
-        const minutesDiff = ceilToNearest(mouseMoveEvent.clientY - segmentPosition.top, this.timeGridSize);
+        const minutesDiff = ceilToNearest(mouseMoveEvent.clientY - segmentPosition.top, this.timeRangeGridSize);
 
         const daysDiff =
           floorToNearest(mouseMoveEvent.clientX - segmentPosition.left, segmentPosition.width) / segmentPosition.width;
@@ -275,9 +240,9 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   }
 
   private onEventCreated({ event }: { event: CalendarEvent }) {
-    if (this.validateTime(event)) {
+    if (this.validateCreatedEvent(event)) {
       const { start, end } = event;
-      this.timeSelect.next({
+      this.timeRangeSelect.next({
         start,
         end,
       });
@@ -285,33 +250,68 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   }
 
   private onEventDeleted({ event }: { event: CalendarEvent }): void {
-    const time = this.times.find(x => x.id === event.id);
-    if (time) {
-      this.timeDelete.next(time);
+    const timeRange = event.meta?.timeRange;
+    if (timeRange) {
+      this.timeRangeDelete.next(timeRange);
     }
   }
-
-  onEventTimesChanged({ event, newStart, newEnd }: CalendarEventTimesChangedEvent) {
-    const updatedEvent = {
-      ...event,
-      start: newStart,
-      end: newEnd,
-    };
-
-    const time = this.times.find(x => x.id === event.id);
-
-    if (time && this.validateTime(updatedEvent)) {
-      this.timeUpdate.next({
-        ...time,
-        start: newStart,
-        end: newEnd,
-      });
+  private validateCreatedEvent = (event: CalendarEvent): event is CalendarEvent & { end: Date } => {
+    // don't allow dragging or resizing events to different days
+    const { start, end } = event;
+    if (!end) {
+      return false;
     }
-  }
 
-  private refresh() {
-    this.cdr.detectChanges();
-  }
+    if (!isSameDay(start, end)) {
+      return false;
+    }
+
+    // don't allow dragging events to the same times as other events
+    if (this.checkOverlapping(event)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  private validateUpdatedEvent = (
+    event: CalendarEvent,
+    before: CalendarEvent,
+  ): event is CalendarEvent & { end: Date } => {
+    // don't allow dragging or resizing events to different days
+    const { start, end } = event;
+    if (!end) {
+      return false;
+    }
+
+    if (!isSameDay(start, end)) {
+      return false;
+    }
+
+    if (!isSameDay(event.start, before.start)) {
+      return false;
+    }
+
+    // don't allow dragging events to the same times as other events
+    if (this.checkOverlapping(event)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  private checkOverlapping = (event: CalendarEvent) => {
+    return this.events.find(otherEvent => {
+      return (
+        otherEvent.id !== event.id &&
+        !otherEvent.allDay &&
+        !!otherEvent.end &&
+        !!event.end &&
+        ((otherEvent.start < event.start && event.start < otherEvent.end) ||
+          (otherEvent.start < event.end && event.start < otherEvent.end))
+      );
+    });
+  };
 
   ngOnDestroy() {
     this.destroySource.next(true);

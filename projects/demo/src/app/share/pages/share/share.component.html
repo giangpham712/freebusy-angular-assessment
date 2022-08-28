@@ -21,12 +21,12 @@
 
       <app-time-range-picker
         [mode]="PickerMode.Calendar"
-        [timeGridSize]="15"
-        [timeFixedDuration]="meetingDuration"
-        [times]="times"
-        (timeSelect)="onTimeSelect($event)"
-        (timeDelete)="onTimeDelete($event)"
-        (timeUpdate)="onTimeUpdate($event)"
+        [timeRangeGridSize]="15"
+        [timeRangeFixedDuration]="meetingDuration"
+        [timeRanges]="timeRanges"
+        (timeRangeSelect)="onTimeRangeSelect($event)"
+        (timeRangeDelete)="onTimeRangeDelete($event)"
+        (timeRangeUpdate)="onTimeRangeUpdate($event)"
       ></app-time-range-picker>
     </div>
   </div>

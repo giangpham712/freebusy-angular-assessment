@@ -10,7 +10,7 @@ import { PickerMode, TimeRange } from '../../../shared/components/time-range-pic
 export class ShareComponent implements OnInit {
   PickerMode = PickerMode;
 
-  times: TimeRange[] = [];
+  timeRanges: TimeRange[] = [];
 
   meetingDuration: number;
 
@@ -31,13 +31,13 @@ export class ShareComponent implements OnInit {
 
   onMeetingDurationChange = () => {
     console.log(this.meetingDuration);
-    this.times = this.times.map(time => ({
+    this.timeRanges = this.timeRanges.map(time => ({
       ...time,
       end: addMinutes(time.start, this.meetingDuration),
     }));
   };
 
-  onTimeSelect = (event: TimeRange) => {
+  onTimeRangeSelect = (event: TimeRange) => {
     console.log('onTimeSelect', event);
 
     const newEvent = {
@@ -46,22 +46,22 @@ export class ShareComponent implements OnInit {
       title: `${format(event.start, 'p')} - ${format(event.end, 'p')}`,
     };
 
-    this.times = [...this.times, newEvent];
+    this.timeRanges = [...this.timeRanges, newEvent];
   };
 
-  onTimeDelete = (event: TimeRange) => {
-    console.log('onTimeDelete', event);
-    this.times = this.times.filter(x => x.id !== event.id);
+  onTimeRangeDelete = (timeRange: TimeRange) => {
+    console.log('onTimeDelete', timeRange);
+    this.timeRanges = this.timeRanges.filter(x => x !== timeRange);
   };
 
-  onTimeUpdate = (event: TimeRange) => {
-    console.log('onTimeUpdate', event);
-    this.times = this.times.map(x => {
-      if (x.id !== event.id) {
+  onTimeRangeUpdate = (timeRange: TimeRange) => {
+    console.log('onTimeUpdate', timeRange);
+    this.timeRanges = this.timeRanges.map(x => {
+      if (x === timeRange) {
         return x;
       }
 
-      return event;
+      return timeRange;
     });
   };
 }

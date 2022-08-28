@@ -8,7 +8,7 @@ import { PickerMode, TimeRange } from '../../../shared/components/time-range-pic
   templateUrl: 'profile.component.html',
 })
 export class ProfileComponent implements OnInit {
-  times: TimeRange[] = [];
+  timeRanges: TimeRange[] = [];
 
   PickerMode = PickerMode;
 
@@ -18,7 +18,7 @@ export class ProfileComponent implements OnInit {
     console.log('ProfileComponent: ngOnInit');
   }
 
-  onTimeSelect = (event: TimeRange) => {
+  onTimeRangeSelect = (event: TimeRange) => {
     console.log('onTimeSelect', event);
 
     const newEvent = {
@@ -27,22 +27,22 @@ export class ProfileComponent implements OnInit {
       title: `${format(event.start, 'p')} - ${format(event.end, 'p')}`,
     };
 
-    this.times = [...this.times, newEvent];
+    this.timeRanges = [...this.timeRanges, newEvent];
   };
 
-  onTimeDelete = (event: TimeRange) => {
-    console.log('onTimeDelete', event);
-    this.times = this.times.filter(x => x.id !== event.id);
+  onTimeRangeDelete = (timeRange: TimeRange) => {
+    console.log('onTimeDelete', timeRange);
+    this.timeRanges = this.timeRanges.filter(x => x !== timeRange);
   };
 
-  onTimeUpdate = (event: TimeRange) => {
-    console.log('onTimeUpdate', event);
-    this.times = this.times.map(x => {
-      if (x.id !== event.id) {
+  onTimeRangeUpdate = (timeRange: TimeRange) => {
+    console.log('onTimeUpdate', timeRange);
+    this.timeRanges = this.timeRanges.map(x => {
+      if (x === timeRange) {
         return x;
       }
 
-      return event;
+      return timeRange;
     });
   };
 }
