@@ -1,10 +1,15 @@
-<h1>Profile</h1>
+<h1 class="">Profile</h1>
 
-<app-time-range-picker
-  [mode]="PickerMode.Timetable"
-  [timeGridSize]="60"
-  [times]="times"
-  (timeSelect)="onTimeSelect($event)"
-  (timeDelete)="onTimeDelete($event)"
-  (timeUpdate)="onTimeUpdate($event)"
-></app-time-range-picker>
+<div class="card my-4">
+  <div class="card-header">Work Hours</div>
+  <div class="card-body">
+    <app-time-range-picker
+      [mode]="PickerMode.Timetable"
+      [timeGridSize]="30"
+      [times]="times"
+      (timeSelect)="onTimeSelect($event)"
+      (timeDelete)="onTimeDelete($event)"
+      (timeUpdate)="onTimeUpdate($event)"
+    ></app-time-range-picker>
+  </div>
+</div>

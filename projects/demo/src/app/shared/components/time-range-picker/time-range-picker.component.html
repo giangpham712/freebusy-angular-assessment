@@ -46,7 +46,7 @@
 
 <mwl-calendar-week-view
   [viewDate]="viewDate"
-  [events]="events"
+  [events]="events$ | async"
   [hourSegments]="hourSegments"
   [hourSegmentTemplate]="weekViewHourSegmentTemplate"
   [headerTemplate]="weekHeaderTemplate"

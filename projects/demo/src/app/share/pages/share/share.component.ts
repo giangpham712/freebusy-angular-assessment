@@ -1,5 +1,5 @@
 import * as uuid from 'uuid';
-import { format } from 'date-fns';
+import { addMinutes, format } from 'date-fns';
 import { Component, OnInit } from '@angular/core';
 import { PickerMode, TimeRange } from '../../../shared/components/time-range-picker/time-range-picker.component';
 
@@ -10,13 +10,28 @@ import { PickerMode, TimeRange } from '../../../shared/components/time-range-pic
 export class ShareComponent implements OnInit {
   PickerMode = PickerMode;
 
-  times: TimeRange[] = [];
+  times: TimeRange[] = [{ start: new Date(), end: addMinutes(new Date(), 30) }];
+
+  meetingDuration: number;
+
+  meetingDurations: { name: string; value: number }[] = [
+    { name: '15 minutes', value: 15 },
+    { name: '30 minutes', value: 30 },
+    { name: '60 minutes', value: 60 },
+    { name: '90 minutes', value: 90 },
+    { name: '2 hours', value: 120 },
+  ];
 
   constructor() {}
 
   ngOnInit() {
     console.log('ShareComponent: ngOnInit');
+    this.meetingDuration = 60;
   }
+
+  onMeetingDurationChange = () => {
+    console.log(this.meetingDuration);
+  };
 
   onTimeSelect = (event: TimeRange) => {
     console.log('onTimeSelect', event);

@@ -6,7 +6,7 @@ import { ShareRoutingModule } from './share-routing.module';
 
 @NgModule({
   imports: [CommonModule, SharedModule, ShareRoutingModule],
-  exports: [],
+  exports: [CommonModule],
   declarations: [ShareComponent],
   providers: [],
 })

@@ -7,9 +7,12 @@ import {
   Output,
   EventEmitter,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
-import { combineLatest, fromEvent, Observable } from 'rxjs';
-import { finalize, takeUntil } from 'rxjs/operators';
+import * as uuid from 'uuid';
+import { format } from 'date-fns';
+import { BehaviorSubject, combineLatest, fromEvent, Observable, Subject } from 'rxjs';
+import { finalize, map, takeUntil, tap } from 'rxjs/operators';
 import { CalendarEvent, WeekViewHourSegment } from 'calendar-utils';
 import { addDays, addMinutes, endOfWeek, isSameDay } from 'date-fns';
 import { CalendarEventAction, CalendarEventTimesChangedEvent } from 'angular-calendar';
@@ -38,7 +41,7 @@ const createEvent = ({
   const actions: CalendarEventAction[] = [];
   if (onDelete)
     actions.push({
-      label: '<span>Delete</span>',
+      label: '<span class="cal-event-delete"><i class="bi bi-x-circle-fill"></i></span>',
       onClick: onDelete,
     });
 
@@ -85,8 +88,8 @@ export type GridSize = 15 | 30 | 60;
   styleUrls: ['./time-range-picker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TimeRangePickerComponent implements OnInit {
-  constructor(private cdr: ChangeDetectorRef) {}
+export class TimeRangePickerComponent implements OnInit, OnDestroy {
+  destroySource = new Subject<boolean>();
 
   @Input()
   mode: PickerMode = PickerMode.Calendar;
@@ -95,10 +98,15 @@ export class TimeRangePickerComponent implements OnInit {
   timeGridSize: GridSize = 15;
 
   @Input()
-  times: TimeRange[] = [];
+  set times(times: TimeRange[]) {
+    this.timesSource.next(times);
+  }
 
   @Input()
-  fixedTimeDuration: number | null = null;
+  timeFixedDuration: number | null = null;
+
+  @Input()
+  maxTimesPerDay: number | null = null;
 
   @Output()
   timeSelect = new EventEmitter<TimeRange>();
@@ -111,41 +119,61 @@ export class TimeRangePickerComponent implements OnInit {
 
   PickerMode = PickerMode;
 
-  events: CalendarEvent[] = [];
-
-  ngOnInit(): void {
-    this.mapTimesToEvents();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['times']) {
-      this.mapTimesToEvents();
-    }
-  }
-
   viewDate = new Date();
-
-  dragToCreateActive = false;
 
   weekStartsOn: 0 = 0;
 
-  dragToSelectEvent: CalendarEvent | null = null;
+  timesSource: BehaviorSubject<TimeRange[]> = new BehaviorSubject<TimeRange[]>([]);
+  eventFromDragSource = new BehaviorSubject<CalendarEvent>(null);
+
+  eventsSources = new BehaviorSubject<CalendarEvent[]>([]);
+  events$: Observable<CalendarEvent[]> = this.eventsSources.asObservable();
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngOnInit(): void {
+    combineLatest([this.timesSource, this.eventFromDragSource])
+      .pipe(
+        takeUntil(this.destroySource),
+        map(([times, eventFromDrag]) => {
+          return [...times.map(t => this.timeToEvent(t)), ...(eventFromDrag ? [eventFromDrag] : [])];
+        }),
+        tap(events => {
+          this.eventsSources.next(events);
+        }),
+      )
+      .subscribe();
+  }
+
+  get times() {
+    return this.timesSource.value;
+  }
 
   get hourSegments() {
     return 60 / this.timeGridSize;
   }
 
-  private mapTimesToEvents() {
-    this.events = this.times.map(x => {
-      const { id, title, start, end } = x;
-      return createEvent({
-        id,
-        title: title || '',
-        start,
-        end,
-        onDelete: ({ event }) => this.onEventDeleted({ event }),
-      });
+  get eventFromDrag() {
+    return this.eventFromDragSource.value;
+  }
+
+  get events() {
+    return this.eventsSources.value;
+  }
+
+  private timeToEvent(time: TimeRange): CalendarEvent {
+    const { id, title, start, end } = time;
+    return createEvent({
+      id,
+      title: title || `${format(start, 'p')} - ${format(end, 'p')}`,
+      start,
+      end,
+      onDelete: ({ event }) => this.onEventDeleted({ event }),
     });
+  }
+
+  private eventToTime(event: CalendarEvent): TimeRange {
+    return {} as TimeRange;
   }
 
   validateTime = (event: CalendarEvent): event is CalendarEvent & { end: Date } => {
@@ -164,7 +192,7 @@ export class TimeRangePickerComponent implements OnInit {
     // don't allow dragging events to the same times as other events
     const overlappingEvent = this.events.find(otherEvent => {
       return (
-        otherEvent !== event &&
+        otherEvent.id !== event.id &&
         !otherEvent.allDay &&
         !!otherEvent.end &&
         !!event.end &&
@@ -172,6 +200,8 @@ export class TimeRangePickerComponent implements OnInit {
           (otherEvent.start < event.end && event.start < otherEvent.end))
       );
     });
+
+    console.log(overlappingEvent);
 
     if (overlappingEvent) {
       return false;
@@ -181,10 +211,13 @@ export class TimeRangePickerComponent implements OnInit {
   };
 
   onMouseDown(segment: WeekViewHourSegment, mouseDownEvent: MouseEvent, segmentElement: HTMLElement) {
-    if (this.fixedTimeDuration) {
-      this.timeSelect.next({
-        start: segment.date,
-        end: addMinutes(segment.date, this.fixedTimeDuration),
+    if (this.timeFixedDuration) {
+      this.onEventCreated({
+        event: createEvent({
+          title: 'New event',
+          start: segment.date,
+          end: addMinutes(segment.date, this.timeFixedDuration),
+        }),
       });
 
       return;
@@ -194,7 +227,7 @@ export class TimeRangePickerComponent implements OnInit {
   }
 
   startDragToCreate(segment: WeekViewHourSegment, mouseDownEvent: MouseEvent, segmentElement: HTMLElement) {
-    this.dragToSelectEvent = {
+    const eventFromDrag = {
       id: this.events.length,
       title: 'New event',
       start: segment.date,
@@ -203,10 +236,10 @@ export class TimeRangePickerComponent implements OnInit {
       },
     };
 
-    this.events = [...this.events, this.dragToSelectEvent];
+    this.eventFromDragSource.next(eventFromDrag);
 
     const segmentPosition = segmentElement.getBoundingClientRect();
-    this.dragToCreateActive = true;
+
     const endOfView = endOfWeek(this.viewDate, {
       weekStartsOn: this.weekStartsOn,
     });
@@ -215,30 +248,29 @@ export class TimeRangePickerComponent implements OnInit {
       .pipe(
         finalize(() => {
           console.log('Finalize');
-          if (this.dragToSelectEvent) {
-            delete this.dragToSelectEvent.meta.tmpEvent;
-            this.dragToCreateActive = false;
+          if (this.eventFromDrag) {
+            delete this.eventFromDrag.meta.tmpEvent;
 
-            this.onEventCreated({ event: this.dragToSelectEvent });
+            this.onEventCreated({ event: this.eventFromDrag });
 
-            this.dragToSelectEvent = null;
-            this.refresh();
+            this.eventFromDragSource.next(null);
           }
         }),
         takeUntil(fromEvent(document, 'mouseup')),
       )
       .subscribe((mouseMoveEvent: MouseEvent) => {
-        console.log(mouseMoveEvent.clientY - segmentPosition.top);
         const minutesDiff = ceilToNearest(mouseMoveEvent.clientY - segmentPosition.top, this.timeGridSize);
 
         const daysDiff =
           floorToNearest(mouseMoveEvent.clientX - segmentPosition.left, segmentPosition.width) / segmentPosition.width;
 
         const newEnd = addDays(addMinutes(segment.date, minutesDiff), daysDiff);
-        if (this.dragToSelectEvent && newEnd > segment.date && newEnd < endOfView) {
-          this.dragToSelectEvent.end = newEnd;
+        if (this.eventFromDrag && newEnd > segment.date && newEnd < endOfView) {
+          this.eventFromDragSource.next({
+            ...this.eventFromDrag,
+            end: newEnd,
+          });
         }
-        this.refresh();
       });
   }
 
@@ -269,12 +301,20 @@ export class TimeRangePickerComponent implements OnInit {
     const time = this.times.find(x => x.id === event.id);
 
     if (time && this.validateTime(updatedEvent)) {
-      this.timeUpdate.next(time);
+      this.timeUpdate.next({
+        ...time,
+        start: newStart,
+        end: newEnd,
+      });
     }
   }
 
   private refresh() {
-    this.events = [...this.events];
     this.cdr.detectChanges();
+  }
+
+  ngOnDestroy() {
+    this.destroySource.next(true);
+    this.destroySource.complete();
   }
 }

@@ -1,10 +1,33 @@
 <h1>Share</h1>
 
-<app-time-range-picker
-  [mode]="PickerMode.Calendar"
-  [timeGridSize]="60"
-  [times]="times"
-  (timeSelect)="onTimeSelect($event)"
-  (timeDelete)="onTimeDelete($event)"
-  (timeUpdate)="onTimeUpdate($event)"
-></app-time-range-picker>
+<div class="card my-4">
+  <div class="card-header">Signup Sheet</div>
+  <div class="card-body">
+    <div class="">
+      <div class="row mb-4">
+        <div class="col-4">
+          <label for="meetingDuration" class="form-label">Meeting duration</label>
+          <select
+            id="meetingDuration"
+            class="form-select"
+            aria-label=""
+            [(ngModel)]="meetingDuration"
+            (change)="onMeetingDurationChange()"
+          >
+            <option *ngFor="let d of meetingDurations" [ngValue]="d.value">{{ d.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <app-time-range-picker
+        [mode]="PickerMode.Calendar"
+        [timeGridSize]="15"
+        [timeFixedDuration]="meetingDuration"
+        [times]="times"
+        (timeSelect)="onTimeSelect($event)"
+        (timeDelete)="onTimeDelete($event)"
+        (timeUpdate)="onTimeUpdate($event)"
+      ></app-time-range-picker>
+    </div>
+  </div>
+</div>
