@@ -10,7 +10,7 @@ import { PickerMode, TimeRange } from '../../../shared/components/time-range-pic
 export class ShareComponent implements OnInit {
   PickerMode = PickerMode;
 
-  times: TimeRange[] = [{ start: new Date(), end: addMinutes(new Date(), 30) }];
+  times: TimeRange[] = [];
 
   meetingDuration: number;
 
