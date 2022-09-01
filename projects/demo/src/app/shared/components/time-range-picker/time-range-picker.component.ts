@@ -155,23 +155,30 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     const { start, end } = this.timeRangeStrategy.toCalendarEventTimes(timeRange);
     let calendarEventBuilder = this.injector.get(CalendarEventBuilder);
 
-    return calendarEventBuilder
+    calendarEventBuilder = calendarEventBuilder
       .reset()
       .withStartTime(start)
       .withEndTime(end)
-      .onDelete(this.onEventDeleted.bind(this))
-      .build();
+      .onDelete(this.onEventDeleted.bind(this));
+
+    if (!this.timeRangeFixedDuration) {
+      calendarEventBuilder = calendarEventBuilder.withVariableDuration();
+    }
+
+    return calendarEventBuilder.build();
   }
 
   onHourSegmentMouseDown({ segment, segmentElement }: { segment: WeekViewHourSegment; segmentElement: HTMLElement }) {
     if (this.timeRangeFixedDuration) {
+      let calendarEventBuilder = this.injector.get(CalendarEventBuilder);
+      const event = calendarEventBuilder
+        .reset()
+        .withStartTime(segment.date)
+        .withFixedDuration(this.timeRangeFixedDuration)
+        .build();
+
       this.onEventCreated({
-        event: this.createEvent({
-          id: uuid.v4(),
-          title: '',
-          start: segment.date,
-          end: addMinutes(segment.date, this.timeRangeFixedDuration),
-        }),
+        event,
       });
 
       return;
@@ -192,13 +199,13 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   }
 
   private startDragToCreate(segment: WeekViewHourSegment, segmentElement: HTMLElement) {
-    const eventFromDrag = {
-      id: uuid.v4(),
-      title: '',
-      start: segment.date,
-      end: addMinutes(segment.date, this.timeRangeGridSize),
-      meta: {},
-    };
+    let calendarEventBuilder = this.injector.get(CalendarEventBuilder);
+    const eventFromDrag = calendarEventBuilder
+      .reset()
+      .withStartTime(segment.date)
+      .withEndTime(addMinutes(segment.date, this.timeRangeGridSize))
+      .withVariableDuration()
+      .build();
 
     this.eventFromDragSource.next(eventFromDrag);
 
@@ -251,41 +258,6 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     if (timeRange) {
       this.timeRangeDelete.next({ deleted: timeRange });
     }
-  }
-
-  private createEvent({
-    id,
-    title,
-    start,
-    end,
-    canResize,
-  }: {
-    id: string;
-    title: string;
-    start: Date;
-    end: Date;
-    canResize?: boolean;
-  }): CalendarEvent {
-    return {
-      id,
-      title,
-      start,
-      end,
-      meta: {},
-      draggable: true,
-      resizable: canResize
-        ? {
-            beforeStart: true,
-            afterEnd: true,
-          }
-        : null,
-      actions: [
-        {
-          label: '<span class="cal-event-delete"><i class="bi bi-x-circle-fill"></i></span>',
-          onClick: ({ event }) => this.onEventDeleted({ event }),
-        },
-      ],
-    };
   }
 
   private getTimeRangeStrategy() {
