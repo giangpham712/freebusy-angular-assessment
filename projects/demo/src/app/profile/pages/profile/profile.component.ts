@@ -1,7 +1,5 @@
-import * as uuid from 'uuid';
-import { format } from 'date-fns';
 import { Component, OnInit } from '@angular/core';
-import { PickerMode, TimeRange } from '../../../shared/components/time-range-picker/time-range-picker.component';
+import { PickerMode, TimeRange } from '../../../shared/components/time-range-picker/types';
 
 @Component({
   selector: 'app-profile',
@@ -19,10 +17,8 @@ export class ProfileComponent implements OnInit {
   }
 
   onTimeRangeCreate = ({ created }: { created: TimeRange }) => {
-    const newTimeRange = {
+    const newTimeRange: TimeRange = {
       ...created,
-      id: uuid.v4(),
-      title: `${format(created.start, 'p')} - ${format(created.end, 'p')}`,
     };
 
     this.timeRanges = [...this.timeRanges, newTimeRange];

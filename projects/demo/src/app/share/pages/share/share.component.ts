@@ -1,7 +1,6 @@
-import * as uuid from 'uuid';
-import { addMinutes, format } from 'date-fns';
+import { addMinutes } from 'date-fns';
 import { Component, OnInit } from '@angular/core';
-import { PickerMode, TimeRange } from '../../../shared/components/time-range-picker/time-range-picker.component';
+import { PickerMode, TimeRange } from '../../../shared/components/time-range-picker/types';
 
 @Component({
   selector: 'app-shared',
@@ -31,17 +30,15 @@ export class ShareComponent implements OnInit {
 
   onMeetingDurationChange = () => {
     console.log(this.meetingDuration);
-    this.timeRanges = this.timeRanges.map(time => ({
-      ...time,
-      end: addMinutes(time.start, this.meetingDuration),
+    this.timeRanges = this.timeRanges.map(timeRange => ({
+      ...timeRange,
+      endTime: addMinutes(timeRange.startTime, this.meetingDuration),
     }));
   };
 
   onTimeRangeCreate = ({ created }: { created: TimeRange }) => {
-    const newTimeRange = {
+    const newTimeRange: TimeRange = {
       ...created,
-      id: uuid.v4(),
-      title: `${format(created.start, 'p')} - ${format(created.end, 'p')}`,
     };
 
     this.timeRanges = [...this.timeRanges, newTimeRange];

@@ -33,6 +33,7 @@ specifiers:
   '@sinonjs/fake-timers': ^9.1.2
   '@stackblitz/sdk': ^1.8.0
   '@types/chai': ^4.3.3
+  '@types/jasmine': ^4.3.0
   '@types/mocha': ^9.1.1
   '@types/node': ^18.7.5
   '@types/sinon': ^10.0.13
@@ -46,6 +47,7 @@ specifiers:
   angularx-flatpickr: 7.0.0
   autoprefixer: ^10.4.8
   bootstrap: ^5.2.0
+  bootstrap-icons: ^1.9.1
   calendar-utils: ^0.10.1
   chai: ^4.3.6
   commitizen: ^4.2.5
@@ -60,9 +62,12 @@ specifiers:
   flatpickr: ^4.6.13
   highlightjs-loader: ^0.2.3
   husky: ^8.0.1
+  jasmine-core: ^4.3.0
   karma: ^6.4.0
   karma-chrome-launcher: ^3.1.1
   karma-coverage: ^2.2.0
+  karma-jasmine: ^5.1.0
+  karma-jasmine-html-reporter: ^2.0.0
   karma-mocha: ^2.0.1
   karma-mocha-reporter: ^2.2.5
   lint-staged: ^13.0.3
@@ -100,6 +105,7 @@ dependencies:
   '@scarf/scarf': 1.1.1
   angular-draggable-droppable: 7.0.0_@angular+core@14.1.2
   angular-resizable-element: 6.0.0_@angular+core@14.1.2
+  bootstrap-icons: 1.9.1
   calendar-utils: 0.10.1
   positioning: 2.0.1
   tslib: 2.4.0
@@ -137,6 +143,7 @@ devDependencies:
   '@sinonjs/fake-timers': 9.1.2
   '@stackblitz/sdk': 1.8.0
   '@types/chai': 4.3.3
+  '@types/jasmine': 4.3.0
   '@types/mocha': 9.1.1
   '@types/node': 18.7.5
   '@types/sinon': 10.0.13
@@ -161,9 +168,12 @@ devDependencies:
   flatpickr: 4.6.13
   highlightjs-loader: 0.2.3
   husky: 8.0.1
+  jasmine-core: 4.3.0
   karma: 6.4.0
   karma-chrome-launcher: 3.1.1
   karma-coverage: 2.2.0
+  karma-jasmine: 5.1.0_karma@6.4.0
+  karma-jasmine-html-reporter: 2.0.0_kn32zzqrpbpapqtjwiltm573ri
   karma-mocha: 2.0.1
   karma-mocha-reporter: 2.2.5_karma@6.4.0
   lint-staged: 13.0.3
@@ -3937,6 +3947,10 @@ packages:
       '@types/node': 18.7.5
     dev: true
 
+  /@types/jasmine/4.3.0:
+    resolution: {integrity: sha512-u1jWakf8CWvLfSEZyxmzkgBzOEvXH/szpT0e6G8BTkx5Eu0BhDn7sbc5dz0JBN/6Wwm9rBe+JAsk9tJRyH9ZkA==}
+    dev: true
+
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: true
@@ -5062,6 +5076,10 @@ packages:
   /boolbase/1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
     dev: true
+
+  /bootstrap-icons/1.9.1:
+    resolution: {integrity: sha512-d4ZkO30MIkAhQ2nNRJqKXJVEQorALGbLWTuRxyCTJF96lRIV6imcgMehWGJUiJMJhglN0o2tqLIeDnMdiQEE9g==}
+    dev: false
 
   /bootstrap/5.2.0_@popperjs+core@2.11.6:
     resolution: {integrity: sha512-qlnS9GL6YZE6Wnef46GxGv1UpGGzAwO0aPL1yOjzDIJpeApeMvqV24iL+pjr2kU4dduoBA9fINKWKgMToobx9A==}
@@ -7850,7 +7868,7 @@ packages:
     dev: true
 
   /fresh/0.5.2:
-    resolution: {integrity: sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=}
+    resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
     engines: {node: '>= 0.6'}
     dev: true
 
@@ -9074,6 +9092,10 @@ packages:
       minimatch: 3.1.2
     dev: true
 
+  /jasmine-core/4.3.0:
+    resolution: {integrity: sha512-qybtBUesniQdW6n+QIHMng2vDOHscIC/dEXjW+JzO9+LoAZMb03RCUC5xFOv/btSKPm1xL42fn+RjlU4oB42Lg==}
+    dev: true
+
   /jest-worker/27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
@@ -9204,6 +9226,28 @@ packages:
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /karma-jasmine-html-reporter/2.0.0_kn32zzqrpbpapqtjwiltm573ri:
+    resolution: {integrity: sha512-SB8HNNiazAHXM1vGEzf8/tSyEhkfxuDdhYdPBX2Mwgzt0OuF2gicApQ+uvXLID/gXyJQgvrM9+1/2SxZFUUDIA==}
+    peerDependencies:
+      jasmine-core: ^4.0.0
+      karma: ^6.0.0
+      karma-jasmine: ^5.0.0
+    dependencies:
+      jasmine-core: 4.3.0
+      karma: 6.4.0
+      karma-jasmine: 5.1.0_karma@6.4.0
+    dev: true
+
+  /karma-jasmine/5.1.0_karma@6.4.0:
+    resolution: {integrity: sha512-i/zQLFrfEpRyQoJF9fsCdTMOF5c2dK7C7OmsuKg2D0YSsuZSfQDiLuaiktbuio6F2wiCsZSnSnieIQ0ant/uzQ==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      karma: ^6.0.0
+    dependencies:
+      jasmine-core: 4.3.0
+      karma: 6.4.0
     dev: true
 
   /karma-mocha-reporter/2.2.5_karma@6.4.0:

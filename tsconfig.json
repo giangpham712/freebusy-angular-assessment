@@ -20,6 +20,9 @@
       ],
       "angular-calendar/date-adapters/moment": [
         "./projects/angular-calendar/src/date-adapters/moment"
+      ],
+      "time-range-picker": [
+        "dist/time-range-picker"
       ]
     },
     "allowSyntheticDefaultImports": true

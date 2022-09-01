@@ -8,6 +8,5 @@ import { ShareRoutingModule } from './share-routing.module';
   imports: [CommonModule, SharedModule, ShareRoutingModule],
   exports: [CommonModule],
   declarations: [ShareComponent],
-  providers: [],
 })
 export class ShareModule {}
