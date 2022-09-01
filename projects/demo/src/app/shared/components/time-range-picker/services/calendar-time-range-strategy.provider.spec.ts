@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { CalendarEvent } from 'calendar-utils';
 import { CalendarTimeRangeStrategy } from './calendar-time-range-strategy.provider';
-import { CalendarEventTimes, TimeRange } from './types';
+import { CalendarEventTimes, TimeRange } from '../types';
 
 describe('CalendarTimeRangeStrategy', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
@@ -24,8 +23,14 @@ describe('CalendarTimeRangeStrategy', () => {
   });
 
   it('toCalendarEventTimes should create calendar event times for the given time range', () => {
-    const timeRange = {} as TimeRange;
+    const timeRange = {
+      startTime: new Date(2022, 7, 12, 10, 15, 0),
+      endTime: new Date(2022, 7, 12, 13, 45, 0),
+    } as TimeRange;
 
-    const event = strategy.toCalendarEventTimes(timeRange);
+    const eventTimes = strategy.toCalendarEventTimes(timeRange);
+
+    expect(eventTimes.start).toEqual(new Date(2022, 7, 12, 10, 15, 0));
+    expect(eventTimes.end).toEqual(new Date(2022, 7, 12, 13, 45, 0));
   });
 });

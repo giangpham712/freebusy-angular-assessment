@@ -68,6 +68,8 @@ export class CalendarEventBuilder {
   public withFixedDuration(duration: number): CalendarEventBuilder {
     this.event.end = addMinutes(this.event.start, duration);
 
+    delete this.event.resizable;
+
     return this;
   }
 

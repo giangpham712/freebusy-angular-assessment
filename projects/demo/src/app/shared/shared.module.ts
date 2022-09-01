@@ -6,7 +6,7 @@ import { TimeRangePickerHeaderComponent } from './components/time-range-picker/t
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TimeRangePickerHourSegmentComponent } from './components/time-range-picker/time-range-picker-hour-segment.component';
-import { CalendarEventBuilder } from './components/time-range-picker/calendar-event-builder.provider';
+import { CalendarEventBuilder } from './components/time-range-picker/services/calendar-event-builder.provider';
 
 @NgModule({
   imports: [CommonModule, FormsModule, CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory })],

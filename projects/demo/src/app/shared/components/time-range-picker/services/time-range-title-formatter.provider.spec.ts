@@ -1,8 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { CalendarEvent } from 'calendar-utils';
-import { CalendarTimeRangeStrategy } from './calendar-time-range-strategy.provider';
 import { TimeRangeTitleFormatter } from './time-range-title-formatter.provider';
-import { CalendarEventTimes, TimeRange } from './types';
 
 describe('TimeRangeTitleFormatter', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

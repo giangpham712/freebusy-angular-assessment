@@ -24,11 +24,11 @@ import {
   TimeRangeUpdatedEvent,
 } from './types';
 import { ceilToNearest, checkOverlapping, floorToNearest } from './utils';
-import { TimetableTimeRangeStrategy } from './timetable-time-range-strategy.provider';
-import { CalendarTimeRangeStrategy } from './calendar-time-range-strategy.provider';
-import { TimeRangeStrategy } from './time-range-strategy.interface';
-import { CalendarEventBuilder } from './calendar-event-builder.provider';
-import { TimeRangeTitleFormatter } from './time-range-title-formatter.provider';
+import { TimetableTimeRangeStrategy } from './services/timetable-time-range-strategy.provider';
+import { CalendarTimeRangeStrategy } from './services/calendar-time-range-strategy.provider';
+import { TimeRangeStrategy } from './services/time-range-strategy.interface';
+import { CalendarEventBuilder } from './services/calendar-event-builder.provider';
+import { TimeRangeTitleFormatter } from './services/time-range-title-formatter.provider';
 
 /**
  *
@@ -53,7 +53,11 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
 
   /**
    * The mode of the picker to use. Available modes include Calendar and Timetable
+   * In Calendar mode, the time picker shows specific dates (with date, month, year) and user can navigate to previous and next months
+   * Picked time ranges will have specific dates
    *
+   * In Timetable mode, the time picker only shows days in week (Monday to Sunday)
+   * Picked time ranges will not have specific dates
    */
   @Input()
   mode: PickerMode = PickerMode.Calendar;
@@ -81,7 +85,6 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
 
     for (const timeRange of timeRanges) {
       const event = this.timeRangeToEvent(timeRange);
-      console.log(event);
       initialEvents.push(event);
       this.timeRangeByEventId.set(event.id.toString(), timeRange);
     }
