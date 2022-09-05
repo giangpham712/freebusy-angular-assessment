@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   selector: 'app-top-nav',
   templateUrl: 'top-nav.component.html',
 })
-export class TopNavComponent implements OnInit {
+export class TopNavComponent {
   links = [
     { title: 'Home', path: '/' },
     { title: 'Profile', path: '/profile' },
@@ -13,6 +13,4 @@ export class TopNavComponent implements OnInit {
   ];
 
   constructor(public route: ActivatedRoute, public router: Router) {}
-
-  ngOnInit() {}
 }

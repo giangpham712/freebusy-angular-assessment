@@ -2,17 +2,12 @@
 @import '~bootstrap-icons/font/bootstrap-icons';
 @import '../../angular-calendar/src/angular-calendar';
 
-
 .cal-event {
     .cal-event-actions {
         display: none;
         position: absolute;
         right: 5px;
-        top: 0px;
-        
-        .cal-event-delete {
-
-        }
+        top: 0;
     }
 
     &:hover {

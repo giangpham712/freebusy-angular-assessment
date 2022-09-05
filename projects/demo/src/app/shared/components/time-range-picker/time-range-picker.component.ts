@@ -8,7 +8,6 @@ import {
   OnDestroy,
   Injector,
 } from '@angular/core';
-import * as uuid from 'uuid';
 import { startOfWeek } from 'date-fns';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, Subject } from 'rxjs';
 import { finalize, map, takeUntil, tap } from 'rxjs/operators';
@@ -36,7 +35,6 @@ import { TimeRangeTitleFormatter } from './services/time-range-title-formatter.p
 @Component({
   selector: 'app-time-range-picker',
   templateUrl: './time-range-picker.component.html',
-  styleUrls: ['./time-range-picker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
