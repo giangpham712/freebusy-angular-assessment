@@ -61,6 +61,10 @@ describe('Utils', () => {
   });
 
   describe('getMinutesInDay should return correct number of minutes in day for a given date', function () {
+    it(`should return 0 if date is null`, function () {
+      expect(getMinutesInDay(null)).toBe(0);
+    });
+
     const testCases: [date: Date, minutes: number][] = [
       [new Date(2022, 12, 12, 9, 15, 0), 555],
       [new Date(2022, 12, 12, 12, 20, 0), 740],

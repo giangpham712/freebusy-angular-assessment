@@ -20,4 +20,15 @@ describe('TimeRangeTitleFormatter', () => {
 
     expect(title).toBe('10:30 AM - 3:15 PM');
   });
+
+  it('week should not show end time if calendar end is missing', () => {
+    const event = {
+      title: '',
+      start: new Date(2022, 8, 20, 10, 30, 0),
+    };
+
+    const title = formatter.week(event);
+
+    expect(title).toBe('10:30 AM -');
+  });
 });

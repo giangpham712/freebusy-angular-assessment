@@ -9,8 +9,8 @@ export class TimeRangeTitleFormatter extends CalendarEventTitleFormatter {
   }
 
   week(event: CalendarEvent): string {
-    return `${formatDate(event.start, 'h:mm a', this.locale)} - ${formatDate(event.end, 'h:mm a', this.locale)} ${
-      event.title
-    }`.trim();
+    return `${formatDate(event.start, 'h:mm a', this.locale)} - ${
+      event.end ? formatDate(event.end, 'h:mm a', this.locale) : ''
+    } ${event.title}`.trim();
   }
 }

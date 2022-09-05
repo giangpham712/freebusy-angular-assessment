@@ -188,17 +188,6 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     this.startDragToCreate(segment, segmentElement);
   }
 
-  onEventTimesChanged({ event, newStart, newEnd }: CalendarEventTimesChangedEvent) {
-    const timeRange = this.timeRangeByEventId.get(event.id.toString());
-
-    if (timeRange && this.validateUpdatedEvent(event, newStart, newEnd)) {
-      this.timeRangeUpdate.next({
-        updated: this.timeRangeStrategy.fromCalendarEventTimes({ start: newStart, end: newEnd }),
-        original: timeRange,
-      });
-    }
-  }
-
   private startDragToCreate(segment: WeekViewHourSegment, segmentElement: HTMLElement) {
     let calendarEventBuilder = this.injector.get(CalendarEventBuilder);
     const eventFromDrag = calendarEventBuilder
@@ -250,6 +239,17 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
     if (this.validateCreatedEvent(event)) {
       this.timeRangeCreate.next({
         created: this.timeRangeStrategy.fromCalendarEventTimes(event),
+      });
+    }
+  }
+
+  onEventTimesChanged({ event, newStart, newEnd }: CalendarEventTimesChangedEvent) {
+    const timeRange = this.timeRangeByEventId.get(event.id.toString());
+
+    if (timeRange && this.validateUpdatedEvent(event, newStart, newEnd)) {
+      this.timeRangeUpdate.next({
+        updated: this.timeRangeStrategy.fromCalendarEventTimes({ start: newStart, end: newEnd }),
+        original: timeRange,
       });
     }
   }

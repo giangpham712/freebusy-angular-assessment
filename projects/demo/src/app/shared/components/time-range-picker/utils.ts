@@ -33,5 +33,9 @@ export const checkOverlapping = (event: CalendarEvent, otherEvents: CalendarEven
  * Get the number of minutes in day for a given date
  */
 export const getMinutesInDay = (date: Date): number => {
+  if (!date) {
+    return 0;
+  }
+
   return differenceInMinutes(date, startOfDay(date));
 };
