@@ -1,5 +1,17 @@
 <h1 align="center">Giang's FreeBusy Angular assessment</h1>
 
+## About
+Giang's work for FreeBusy Angular assessment
+<br>
+<br>
+
+## Demo
+The demo app is available [here](http://website-content-c5b0e8d.s3-website-us-east-1.amazonaws.com/)
+<br>
+<br>
+
+
+## Setup & Run
 
 ### Prepare your environment
 
