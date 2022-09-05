@@ -9,6 +9,7 @@ import { PickerMode } from './types';
 describe('TimeRangePickerComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      imports: [],
       declarations: [TimeRangePickerComponent],
     }).compileComponents();
   }));

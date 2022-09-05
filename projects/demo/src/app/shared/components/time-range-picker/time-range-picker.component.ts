@@ -7,6 +7,7 @@ import {
   EventEmitter,
   OnDestroy,
   Injector,
+  ViewChild,
 } from '@angular/core';
 import { startOfWeek } from 'date-fns';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, Subject } from 'rxjs';
@@ -22,12 +23,13 @@ import {
   TimeRangeDeletedEvent,
   TimeRangeUpdatedEvent,
 } from './types';
-import { ceilToNearest, checkOverlapping, floorToNearest } from './utils';
+import { ceilToNearest, floorToNearest } from './utils';
 import { TimetableTimeRangeStrategy } from './services/timetable-time-range-strategy.provider';
 import { CalendarTimeRangeStrategy } from './services/calendar-time-range-strategy.provider';
 import { TimeRangeStrategy } from './services/time-range-strategy.interface';
 import { CalendarEventBuilder } from './services/calendar-event-builder.provider';
 import { TimeRangeTitleFormatter } from './services/time-range-title-formatter.provider';
+import { CalendarEventValidationHelper } from './services/calendar-event-validation-helper.provider';
 
 /**
  *
@@ -236,7 +238,8 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
   }
 
   private onEventCreated({ event }: { event: CalendarEvent }) {
-    if (this.validateCreatedEvent(event)) {
+    const validationHelper = new CalendarEventValidationHelper(this.events);
+    if (validationHelper.validateCreate(event)) {
       this.timeRangeCreate.next({
         created: this.timeRangeStrategy.fromCalendarEventTimes(event),
       });
@@ -245,8 +248,9 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
 
   onEventTimesChanged({ event, newStart, newEnd }: CalendarEventTimesChangedEvent) {
     const timeRange = this.timeRangeByEventId.get(event.id.toString());
+    const validationHelper = new CalendarEventValidationHelper(this.events);
 
-    if (timeRange && this.validateUpdatedEvent(event, newStart, newEnd)) {
+    if (timeRange && validationHelper.validateUpdate(event, newStart, newEnd)) {
       this.timeRangeUpdate.next({
         updated: this.timeRangeStrategy.fromCalendarEventTimes({ start: newStart, end: newEnd }),
         original: timeRange,
@@ -269,52 +273,6 @@ export class TimeRangePickerComponent implements OnInit, OnDestroy {
         return new CalendarTimeRangeStrategy();
     }
   }
-
-  private validateCreatedEvent = (event: CalendarEvent): event is CalendarEvent & { end: Date } => {
-    // don't allow dragging or resizing events to different days
-    const { start, end } = event;
-    if (!end) {
-      return false;
-    }
-
-    if (!isSameDay(start, end)) {
-      return false;
-    }
-
-    const otherEvents = this.events.filter(x => x.id !== event.id);
-    if (checkOverlapping(event, otherEvents)) {
-      return false;
-    }
-
-    return true;
-  };
-
-  private validateUpdatedEvent = (
-    event: CalendarEvent,
-    newStart: Date,
-    newEnd: Date,
-  ): event is CalendarEvent & { end: Date } => {
-    // don't allow dragging or resizing events to different days
-
-    if (!newEnd) {
-      return false;
-    }
-
-    if (!isSameDay(newStart, newEnd)) {
-      return false;
-    }
-
-    if (!isSameDay(event.start, newStart)) {
-      return false;
-    }
-
-    const otherEvents = this.events.filter(x => x.id !== event.id);
-    if (checkOverlapping({ ...event, start: newStart, end: newEnd }, otherEvents)) {
-      return false;
-    }
-
-    return true;
-  };
 
   ngOnDestroy() {
     this.destroySource.next(true);
